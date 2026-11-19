@@ -2,10 +2,21 @@ version: 2
 
 models:
   - name: dim_customers
-    description: "One row per customer, with lifetime stats from valid delivered orders."
+    description: "One row per customer. Descriptive attributes only; history lives in snap_customers."
     columns:
       - name: customer_id
         data_tests: [unique, not_null]
+
+  - name: customer_metrics
+    description: "One row per customer with at least one delivered order. Lifetime stats derived from fct_orders."
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
 
   - name: dim_restaurants
     description: "One row per restaurant."

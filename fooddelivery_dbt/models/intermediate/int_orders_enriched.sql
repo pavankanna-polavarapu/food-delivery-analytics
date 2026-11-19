@@ -53,6 +53,7 @@ joined as (
         o.tax_amount,
         o.total_amount,
         o.promo_code,
+        o.updated_at,
 
         o.customer_id,
         c.customer_city,
