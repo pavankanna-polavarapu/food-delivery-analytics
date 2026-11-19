@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "One row per customer, with lifetime stats from valid delivered orders."
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+
+  - name: dim_restaurants
+    description: "One row per restaurant."
+    columns:
+      - name: restaurant_id
+        data_tests: [unique, not_null]
+
+  - name: dim_delivery_partners
+    description: "One row per delivery partner."
+    columns:
+      - name: partner_id
+        data_tests: [unique, not_null]
+
+  - name: dim_date
+    description: "Calendar dimension, one row per day."
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
+  
+  - name: fct_orders
+    description: "Grain: one row per valid order."
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: restaurant_id
+        data_tests:
+          - relationships:
+              to: ref('dim_restaurants')
+              field: restaurant_id
+              config:
+                severity: warn
+      - name: order_date
+        data_tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_day
+      - name: total_amount
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+  - name: fct_deliveries
+    description: "Grain: one row per delivery with valid timestamps."
+    columns:
+      - name: delivery_id
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - unique
+          - relationships:
+              to: ref('fct_orders')
+              field: order_id
+      - name: partner_id
+        data_tests:
+          - relationships:
+              to: ref('dim_delivery_partners')
+              field: partner_id
+      - name: delivery_minutes
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0

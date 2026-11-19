@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "One row per order, deduplicated on order_id (latest updated_at wins). Statuses lowercased."
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: restaurant_id
+        data_tests:
+          - relationships:
+              to: ref('stg_restaurants')
+              field: restaurant_id
+              config:
+                severity: warn
+      - name: order_status
+        data_tests:
+          - accepted_values:
+              values: ['delivered', 'cancelled', 'refunded']
+
+  - name: stg_customers
+    description: "One row per customer. Email lowercased and trimmed."
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+
+  - name: stg_restaurants
+    description: "One row per restaurant."
+    columns:
+      - name: restaurant_id
+        data_tests: [unique, not_null]
+
+  - name: stg_delivery_partners
+    description: "One row per delivery partner."  
+    columns:
+      - name: partner_id
+        data_tests: [unique, not_null]
+
+  - name: stg_deliveries
+    description: "One row per delivery. Flags rows where delivered_ts is before pickup_ts."
+    columns:
+      - name: delivery_id
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - unique
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+
+  - name: stg_payments
+    description: "One row per payment. Method and status lowercased."
+    columns:
+      - name: payment_id
+        data_tests: [unique, not_null]
+      - name: payment_status
+        data_tests:
+          - accepted_values:
+              values: ['success', 'failed']

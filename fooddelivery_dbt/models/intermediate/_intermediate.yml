@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: int_orders_enriched
+    description: "One row per order, joined with customer, restaurant, payment and delivery. is_valid_order marks rows excluded from marts."
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
