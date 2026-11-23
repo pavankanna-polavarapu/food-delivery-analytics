@@ -17,7 +17,7 @@ renamed as (
         customer_id,
         restaurant_id,
         order_ts,
-        lower(trim(order_status))  as order_status,
+        {{ clean_string('order_status') }} as order_status,
         subtotal                   as subtotal_amount,
         discount                   as discount_amount,
         tax                        as tax_amount,

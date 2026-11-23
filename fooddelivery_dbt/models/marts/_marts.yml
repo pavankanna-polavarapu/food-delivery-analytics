@@ -3,11 +3,34 @@ version: 2
 models:
   - name: dim_customers
     description: "One row per customer. Descriptive attributes only; history lives in snap_customers."
+    latest_version: 2
+    config:
+      contract:
+        enforced: true
     columns:
       - name: customer_id
+        data_type: number(38,0)
         data_tests: [unique, not_null]
+      - name: customer_name
+        data_type: varchar
+      - name: email
+        data_type: varchar
+      - name: phone
+        data_type: varchar
+      - name: city
+        data_type: varchar
+      - name: signup_date
+        data_type: date
+    versions:
+      - v: 1
+        defined_in: dim_customers
+        deprecation_date: 2027-03-01
+      - v: 2
+        columns: 
+          - include: all
+            exclude: [email, phone]
 
-  - name: customer_metrics
+  - name: dim_customer_metrics
     description: "One row per customer with at least one delivered order. Lifetime stats derived from fct_orders."
     columns:
       - name: customer_id
@@ -20,9 +43,28 @@ models:
 
   - name: dim_restaurants
     description: "One row per restaurant."
+    config:
+      contract: 
+        enforced: true
     columns:
       - name: restaurant_id
+        data_type: number(38,0)
+        constraints:
+          - type: not_null
+          - type: primary_key
         data_tests: [unique, not_null]
+      - name: restaurant_name
+        data_type: varchar
+      - name: city
+        data_type: varchar
+      - name: cuisine
+        data_type: varchar
+      - name: cuisine_type_cleaned
+        data_type: varchar
+      - name: avg_rating
+        data_type: float
+      - name: is_active
+        data_type: boolean
 
   - name: dim_delivery_partners
     description: "One row per delivery partner."
@@ -46,6 +88,9 @@ models:
           - relationships:
               to: ref('dim_customers')
               field: customer_id
+          - not_null:
+              config:
+                severity: warn
       - name: restaurant_id
         data_tests:
           - relationships:

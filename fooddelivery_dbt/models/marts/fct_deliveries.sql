@@ -15,7 +15,8 @@ select
     promised_minutes,
     delivery_minutes,
     is_late_delivery,
-    greatest(delivery_minutes - promised_minutes, 0) as minutes_over_sla
+    greatest(delivery_minutes - promised_minutes, 0) as minutes_over_sla,
+    {{ audit_columns() }}
 from {{ ref('int_orders_enriched') }}
 where is_valid_order
   and delivery_id is not null
